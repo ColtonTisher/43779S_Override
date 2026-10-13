@@ -4,10 +4,12 @@ The author is new to C++. Explain the code in the files themselves.
 
 ## Comments
 
-- Put a short comment above every function, variable, constant, include, macro, class, enum, and non-obvious statement.
-- Say what it does and why it is there, in plain words. Assume the reader is new to C++ and to VEX.
-- Keep each comment to one or two lines. Skip jokes and restating the line word for word.
-- Leave the existing VEXcode file banners at the top of each file.
+The author is new to C++. Keep files easy to scan.
+
+- Put one short comment above each function, and above a group of related settings.
+- Add a line comment only when the name does not already say what is happening, or when the reason matters.
+- Use plain words. One or two lines. Do not restate the code.
+- Leave the VEXcode file banner at the top of each file.
 
 ## Game
 

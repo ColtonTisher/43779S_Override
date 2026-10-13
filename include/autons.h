@@ -5,37 +5,24 @@
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 
-// Read this header only once, even if several other files include it.
 #pragma once
 
-// A list of every autonomous routine the robot knows.
-// "enum class" is a set of named choices, safer than plain numbers because
-// you cannot accidentally mix them with unrelated integers.
-// To add a routine: add a name here, write a run function, include its header
-// from autons.cpp, and add a case in runSelectedAuton().
+// Add a routine in three places: this list, autonName(), and runSelectedAuton().
 enum class Auton {
-  // Do nothing. Useful if you need the robot to sit still for autonomous.
-  None,
-  // 60-second skills route. Uses the whole field.
-  Skills,
-  // 15-second match route from the left alliance corner.
-  MatchLeft,
-  // 15-second match route from the right alliance corner.
-  MatchRight,
+  None,       // Sit still.
+  Skills,     // 60-second skills route. Whole field.
+  MatchLeft,  // 15-second match route from the left corner.
+  MatchRight, // 15-second match route from the right corner.
 };
 
-// Which routine autonomous() will run. "extern" means the real variable
-// lives in autons.cpp, so every file shares one copy.
-// Change that value, or call selectNextAuton() once a button picker exists.
+// The routine autonomous() will run. The real value lives in autons.cpp.
 extern Auton selectedAuton;
 
-// Turn an Auton choice into words for the brain screen.
-// "const char *" is a piece of text that this function does not modify.
+// Screen label for a routine.
 const char *autonName(Auton auton);
 
-// Move to the next routine: None, Skills, MatchLeft, MatchRight, then None.
-// Handy for a controller or brain button later.
+// None -> Skills -> MatchLeft -> MatchRight -> None.
 void selectNextAuton();
 
-// Run whichever routine selectedAuton currently names.
+// Run the routine named by selectedAuton.
 void runSelectedAuton();

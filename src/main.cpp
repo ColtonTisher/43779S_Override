@@ -3,120 +3,75 @@
 /*    Module:       main.cpp                                                  */
 /*    Author:       colto                                                     */
 /*    Created:      10/8/2026, 9:10:30 PM                                     */
-/*    Description:  Competition entry point for VEX V5 2026-2027 OVERRIDE.    */
-/*                  Devices live in robot-config. Autonomous routines live   */
-/*                  in src/auton_*.cpp. Shared moves live in auton_controls.   */
-/*                  Game rules are summarized in GAME.md.                     */
+/*    Description:  Match entry point. Setup, autonomous, then driver control.*/
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 
-// The auton list and runSelectedAuton().
 #include "autons.h"
-// Motors, controller, brain, and initRobot().
 #include "robot-config.h"
-// VEX helpers, including the competition object and wait().
 #include "vex.h"
 
-// So we can write competition, percent, and forward without the vex:: prefix.
 using namespace vex;
 
-// Talks to the field control system. It decides when autonomous and driver
-// control are allowed to run during a match.
+// Talks to the field. The field decides when each match period may run.
 competition Competition;
 
-/*---------------------------------------------------------------------------*/
-/*                          Pre-Autonomous Functions                         */
-/*                                                                           */
-/*  Runs once after the brain powers on. Return from this function or        */
-/*  autonomous and driver control will not start.                            */
-/*---------------------------------------------------------------------------*/
+// Percent power for the mechanisms. Drive speed comes from the joysticks.
+const int INTAKE_SPEED = 100;
+const int SCORER_SPEED = 50;
 
-// Setup that must finish before the match. Keep this short. A long wait here
-// can make the robot miss the start of autonomous.
+// One button spins forward, the other spins backward. Neither button stops.
+static void runMotor(motor &device, bool forwardButton, bool reverseButton, int speed) {
+  if (forwardButton) {
+    device.spin(forward, speed, percent);
+  } else if (reverseButton) {
+    device.spin(reverse, speed, percent);
+  } else {
+    device.stop();
+  }
+}
+
+// Runs once when the brain turns on. Keep it short so autonomous is not late.
 void pre_auton(void) {
-  // Set brake modes and calibrate the inertial sensor if it is installed.
   initRobot();
 
-  // Show which routine will run, on the line under "Robot ready".
   Brain.Screen.setCursor(2, 1);
   Brain.Screen.print("Auton: %s", autonName(selectedAuton));
 }
 
-/*---------------------------------------------------------------------------*/
-/*                              Autonomous Task                              */
-/*---------------------------------------------------------------------------*/
+// The field calls this once at the start of autonomous.
+void autonomous(void) {
+  runSelectedAuton();
+}
 
-// The field calls this when the autonomous period starts.
-// It runs once, then returns. Do not put a forever loop in here.
-void autonomous(void) { runSelectedAuton(); }
-
-/*---------------------------------------------------------------------------*/
-/*                              User Control Task                            */
-/*---------------------------------------------------------------------------*/
-
-// The field calls this when the driver-control period starts.
-// The loop never ends on its own. The field stops the program when the
-// match ends.
+// The field calls this when driver control starts. It runs until the match ends.
 void usercontrol(void) {
-  // "while (true)" means "repeat forever."
   while (true) {
-    // Tank drive: the left stick runs the left wheels, the right stick runs
-    // the right wheels. Axis values are about -100 to 100.
-    // Swap to arcade later if the driver prefers one stick for forward
-    // and the other stick for turning.
-    const int leftSpeed = Controller1.Axis3.position();
-    const int rightSpeed = Controller1.Axis2.position();
-    // spin keeps turning at this percent until the next command replaces it.
-    LeftDrive.spin(forward, leftSpeed, percent);
-    RightDrive.spin(forward, rightSpeed, percent);
+    // Tank drive. Left stick drives the left wheels, right stick the right wheels.
+    LeftDrive.spin(forward, Controller1.Axis3.position(), percent);
+    RightDrive.spin(forward, Controller1.Axis2.position(), percent);
 
-    // Intake on the right shoulder buttons. Skipped until PORT_INTAKE is set.
+    // R1 / R2 run the intake. L1 / L2 run the scorer. Skipped if not installed.
     if (hasIntake()) {
-      // R1 sucks in (or scores, depending on how the rollers are geared).
-      if (Controller1.ButtonR1.pressing()) {
-        Intake.spin(forward, 100, percent);
-      // R2 runs the rollers the other way, to spit a game piece back out.
-      } else if (Controller1.ButtonR2.pressing()) {
-        Intake.spin(reverse, 100, percent);
-      } else {
-        // Neither button is held, so let the intake coast to a stop.
-        Intake.stop();
-      }
+      runMotor(Intake, Controller1.ButtonR1.pressing(), Controller1.ButtonR2.pressing(), INTAKE_SPEED);
     }
-
-    // Scorer on the left shoulder buttons. Skipped until PORT_SCORER is set.
     if (hasScorer()) {
-      // L1 runs the scorer forward at half speed.
-      if (Controller1.ButtonL1.pressing()) {
-        Scorer.spin(forward, 50, percent);
-      // L2 runs it backward, for example to lower an arm.
-      } else if (Controller1.ButtonL2.pressing()) {
-        Scorer.spin(reverse, 50, percent);
-      } else {
-        // Neither button is held. stop() uses the hold mode from initRobot,
-        // so an arm stays where the driver left it.
-        Scorer.stop();
-      }
+      runMotor(Scorer, Controller1.ButtonL1.pressing(), Controller1.ButtonL2.pressing(), SCORER_SPEED);
     }
 
-    // Pause 20 thousandths of a second before reading the controller again.
-    // That is 50 updates per second, fast for a driver and easy on the brain.
+    // Read the controller 50 times per second.
     wait(20, msec);
   }
 }
 
-// Every C++ program starts in main. The VEX competition template uses it to
-// register the two match functions, run setup, then sit idle.
+// Register the match functions, set up the robot, then wait for the field.
 int main() {
-  // Tell the field which functions to call for each match period.
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
 
-  // Set up devices now, before the match clock starts.
   pre_auton();
 
-  // Stay alive so the field can still call autonomous() and usercontrol().
-  // If main returned, the program would exit and the robot would not drive.
+  // Leaving main would end the program, so the robot would not drive.
   while (true) {
     wait(100, msec);
   }
