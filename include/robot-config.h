@@ -2,7 +2,7 @@
 /*                                                                            */
 /*    Module:       robot-config.h                                            */
 /*    Description:  Ports, gearing, and the devices the rest of the code uses.*/
-/*                  Change hardware in ROBOT.md, then update this file.       */
+/*                  Change hardware in README.md, then update this file.      */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 

@@ -1,6 +1,6 @@
 # Project rules
 
-The author is new to C++. Explain the code in the files themselves.
+The team is new to C++. Explain the code in the files themselves.
 
 ## Comments
 
@@ -13,4 +13,4 @@ The author is new to C++. Keep files easy to scan.
 
 ## Game
 
-This is a VEX V5 high school robot for the 2026-2027 game OVERRIDE, team 43779S. Read `GAME.md` before writing autonomous, driver control, or mechanism code. The official manual is version 2.1 (October 8, 2026). `GAME.md` is a working summary. If it disagrees with the current official manual or an official Q&A, the official source wins.
+This is a VEX V5 high school robot for the 2026-2027 game OVERRIDE, team 43779S. Read the Game section of `README.md` before writing autonomous, driver control, or mechanism code. The official manual is version 2.1 (October 8, 2026). That section is a working summary. If it disagrees with the current official manual or an official Q&A, the official source wins. The Robot section of `README.md` is the hardware list.
