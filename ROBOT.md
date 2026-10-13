@@ -6,7 +6,7 @@ Code that should follow this file:
 
 - `include/robot-config.h` and `src/robot-config.cpp` for ports, gearing, and devices
 - `src/main.cpp` for driver controls
-- `include/autons.h` and `src/auton-*.cpp` when routines are added or removed
+- `include/autons.h`, `src/auton_*.cpp`, and `include/auton_controls.h` when routines are added or removed
 
 Leave a cell as `unused` when that device is not on the robot yet. `unused` maps to `PORT21`, which must stay empty.
 
@@ -74,12 +74,15 @@ The routine in `Selected` is the one `autonomous()` runs.
 
 | Setting | Value |
 |---|---|
-| Selected | Drive Forward |
+| Selected | Match Left |
 
 | Routine | File | Description |
 |---|---|---|
 | None | src/autons.cpp | Does nothing |
-| Drive Forward | src/auton-drive-forward.cpp | Drive 24 inches at 50% |
-| Skills | src/auton-skills.cpp | Stub route, 12 inches at 40% |
+| Skills | src/auton_skills.cpp | Stub route, 12 inches at 40% |
+| Match Left | src/auton_match_left.cpp | Drive 24 inches at 50% |
+| Match Right | src/auton_match_right.cpp | Drive 24 inches at 50% |
+
+Shared moves used by every routine live in `include/auton_controls.h` and `src/auton_controls.cpp`.
 
 Add a row here when you want a new routine file.

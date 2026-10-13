@@ -5,7 +5,7 @@
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 
-// Read this header only once, even if several files include it.
+// Read this header only once, even if several other files include it.
 #pragma once
 
 // A list of every autonomous routine the robot knows.
@@ -16,10 +16,12 @@
 enum class Auton {
   // Do nothing. Useful if you need the robot to sit still for autonomous.
   None,
-  // Short straight drive, used to check ports and wheel size.
-  DriveForward,
-  // The skills-challenge route. Still a short stub until the route is planned.
+  // 60-second skills route. Uses the whole field.
   Skills,
+  // 15-second match route from the left alliance corner.
+  MatchLeft,
+  // 15-second match route from the right alliance corner.
+  MatchRight,
 };
 
 // Which routine autonomous() will run. "extern" means the real variable
@@ -31,7 +33,7 @@ extern Auton selectedAuton;
 // "const char *" is a piece of text that this function does not modify.
 const char *autonName(Auton auton);
 
-// Move to the next routine in the list, wrapping from Skills back to None.
+// Move to the next routine: None, Skills, MatchLeft, MatchRight, then None.
 // Handy for a controller or brain button later.
 void selectNextAuton();
 

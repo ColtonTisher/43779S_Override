@@ -5,7 +5,8 @@
 /*    Created:      10/8/2026, 9:10:30 PM                                     */
 /*    Description:  Competition entry point for VEX V5 2026-2027 OVERRIDE.    */
 /*                  Devices live in robot-config. Autonomous routines live   */
-/*                  in src/auton-*.cpp. Game rules are summarized in GAME.md. */
+/*                  in src/auton_*.cpp. Shared moves live in auton_controls.   */
+/*                  Game rules are summarized in GAME.md.                     */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 

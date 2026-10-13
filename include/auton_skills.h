@@ -1,13 +1,13 @@
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
-/*    Module:       auton-skills.h                                            */
-/*    Description:  Skills routine. Fill this in as the route is planned.     */
+/*    Module:       auton_skills.h                                            */
+/*    Description:  Skills autonomous route.                                  */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 
 // Read this header only once if several files include it.
 #pragma once
 
-// Run the skills-challenge route.
-// The steps live in src/auton-skills.cpp. Right now it only drives a foot.
+// Run the 60-second skills route.
+// The steps live in src/auton_skills.cpp.
 void runSkills();

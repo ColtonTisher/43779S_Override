@@ -1,13 +1,13 @@
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
-/*    Module:       auton-drive-forward.h                                     */
-/*    Description:  Simple drive-off-the-line routine.                        */
+/*    Module:       auton_match_left.h                                        */
+/*    Description:  15-second match autonomous from the left start.           */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 
 // Read this header only once if several files include it.
 #pragma once
 
-// Drive straight a short distance, then stop.
-// The steps live in src/auton-drive-forward.cpp.
-void runDriveForward();
+// Run the left-side match route.
+// The steps live in src/auton_match_left.cpp.
+void runMatchLeft();
