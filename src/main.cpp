@@ -17,10 +17,11 @@ using namespace vex;
 competition Competition;
 
 // Percent power for the mechanisms. Drive speed comes from the joysticks.
-const int INTAKE_SPEED = 100;
-const int SCORER_SPEED = 50;
+const int LIFT_SPEED = 100;
+const int ARM_SPEED = 50;
+const int WRIST_SPEED = 50;
 
-// One button spins forward, the other spins backward. Neither button stops.
+// One button spins forward, the other spins backward. Releasing both holds.
 static void runMotor(motor &device, bool forwardButton, bool reverseButton, int speed) {
   if (forwardButton) {
     device.spin(forward, speed, percent);
@@ -28,6 +29,60 @@ static void runMotor(motor &device, bool forwardButton, bool reverseButton, int 
     device.spin(reverse, speed, percent);
   } else {
     device.stop();
+  }
+}
+
+// X keeps the claw intaking. A short B press stops it. Holding B for 2 seconds
+// turns it 30 degrees open, then holds. Opening starts when the hold time is up.
+static void runClaw(bool intakeButton, bool actionButton) {
+  static bool actionWasPressed = false;
+  static bool opening = false;
+  static timer actionHold;
+
+  bool actionJustPressed = actionButton && !actionWasPressed;
+  bool actionJustReleased = !actionButton && actionWasPressed;
+  actionWasPressed = actionButton;
+
+  if (intakeButton) {
+    opening = false;
+    Claw.spin(forward, 100, percent);
+    return;
+  }
+
+  if (actionJustPressed) {
+    actionHold.reset();
+  }
+
+  if (actionButton && actionHold.time(msec) >= CLAW_OPEN_HOLD_MSEC && !opening) {
+    Claw.setPosition(0, degrees);
+    Claw.spin(reverse, CLAW_OPEN_SPEED, percent);
+    opening = true;
+  }
+
+  if (actionJustReleased && !opening) {
+    Claw.stop();
+  }
+
+  if (opening) {
+    double turned = Claw.position(degrees);
+    if (turned < 0) {
+      turned = -turned;
+    }
+    if (turned >= CLAW_OPEN_DEGREES) {
+      Claw.stop();
+      opening = false;
+    }
+  }
+}
+
+// Same button logic for two motors that must spin together.
+static void runMotorGroup(motor_group &devices, bool forwardButton, bool reverseButton, int speed) {
+  if (forwardButton) {
+    devices.spin(forward, speed, percent);
+  } else if (reverseButton) {
+    devices.spin(reverse, speed, percent);
+  } else {
+    devices.stop();
   }
 }
 
@@ -51,13 +106,35 @@ void usercontrol(void) {
     LeftDrive.spin(forward, Controller1.Axis3.position(), percent);
     RightDrive.spin(forward, Controller1.Axis2.position(), percent);
 
-    // R1 / R2 run the intake. L1 / L2 run the scorer. Skipped if not installed.
-    if (hasIntake()) {
-      runMotor(Intake, Controller1.ButtonR1.pressing(), Controller1.ButtonR2.pressing(), INTAKE_SPEED);
+    // R1 moves the arm toward the front. R2 moves it toward the back.
+    // L1 winds the lift up. L2 lets it down.
+    // X intakes with the claw. A short B stops it. Hold B for 2 seconds to open it.
+    // Up tilts the wrist one way. Down tilts it the other way.
+    if (hasLift()) {
+      // Port 9 is already reversed in its setup, so both get the same command.
+      if (Controller1.ButtonL1.pressing()) {
+        LiftA.spin(forward, LIFT_SPEED, percent);
+        LiftB.spin(forward, LIFT_SPEED, percent);
+      } else if (Controller1.ButtonL2.pressing()) {
+        LiftA.spin(reverse, LIFT_SPEED, percent);
+        LiftB.spin(reverse, LIFT_SPEED, percent);
+      } else {
+        LiftA.stop();
+        LiftB.stop();
+      }
     }
-    if (hasScorer()) {
-      runMotor(Scorer, Controller1.ButtonL1.pressing(), Controller1.ButtonL2.pressing(), SCORER_SPEED);
+    if (hasArm()) {
+      runMotor(Arm, Controller1.ButtonR1.pressing(), Controller1.ButtonR2.pressing(), ARM_SPEED);
     }
+    if (hasClaw()) {
+      runClaw(Controller1.ButtonX.pressing(), Controller1.ButtonB.pressing());
+    }
+    if (hasWrist()) {
+      runMotor(Wrist, Controller1.ButtonUp.pressing(), Controller1.ButtonDown.pressing(), WRIST_SPEED);
+    }
+
+    // Left arrow turns the port A pneumatic on. Releasing it turns the solenoid off.
+    Pneumatic.set(Controller1.ButtonLeft.pressing());
 
     // Read the controller 50 times per second.
     wait(20, msec);

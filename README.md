@@ -13,7 +13,7 @@ The program is a competition template. The field starts autonomous, then driver 
 | `src/robot-config.cpp` | Creates the motors and sets brake modes |
 | `include/autons.h` | List of autonomous routines, and which one runs |
 | `src/autons.cpp` | Runs the selected routine and prints its name |
-| `include/auton_controls.h` | Shared drive, turn, intake, and score moves |
+| `include/auton_controls.h` | Shared drive, turn, and score moves |
 | `src/auton_skills.cpp` | 60-second skills route |
 | `src/auton_match_left.cpp` | 15-second route from the left corner |
 | `src/auton_match_right.cpp` | 15-second route from the right corner |
@@ -28,10 +28,15 @@ Tank drive. The left stick (Axis3) runs the left wheels. The right stick (Axis2)
 
 | Buttons | Mechanism | Speed |
 |---|---|---|
-| R1 / R2 | Intake forward / reverse | 100% |
-| L1 / L2 | Scorer forward / reverse | 50% |
+| R1 / R2 | Arm toward the front / toward the back | 50% |
+| L1 / L2 | Lift up / down | 100% |
+| X | Claw intake | 100% |
+| B, short press | Claw stop | hold |
+| B, held 2 seconds | Claw open 30 degrees | 30% |
+| Up / Down | Wrist tilt | 50% |
+| Left | Pneumatic on port A | on while held |
 
-The intake and scorer are skipped until their ports are set in `ROBOT.md`. Releasing the buttons stops that mechanism.
+Releasing the lift buttons holds the string so it does not unwind. The arm moves only while R1 or R2 is held, then holds where you let go. Hold X to intake with the claw. Tap B to stop it. Hold B for 2 seconds and it turns 30 degrees open, then holds. Up and Down tilt the wrist, and it holds when you let go. The scorer has no driver buttons yet.
 
 ## Autonomous
 
@@ -48,9 +53,10 @@ Write a path by calling the shared moves. A negative distance drives backward. A
 
 ```cpp
 void runMatchLeft() {
-  autonDrive(24, 50);          // 24 inches forward at half speed
-  autonTurn(90, 40);           // 90 degrees right at 40%
-  autonIntake(100, 500);       // intake for half a second
+  autonDrive(24, 50);          // 24 inches forward, measured by the tracking wheel
+  autonTurn(90, 40);           // 90 degrees right, measured by the inertial
+  autonDriveToWall("front", 8, 40); // stop 8 inches from the front wall
+  autonDriveToWall("left", 6, 40);  // turn left, stop 6 inches from that wall, turn back
   autonScore(50, 800);         // scorer for 0.8 seconds
   autonStop();
 }

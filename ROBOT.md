@@ -15,12 +15,12 @@ Leave a cell as `unused` when that device is not on the robot yet. `unused` maps
 | Setting | Value |
 |---|---|
 | Type | tank |
-| Motors per side | 3 |
-| Cartridge | blue |
-| Wheel diameter (in) | 4 |
-| Track width (mm) | 320 |
-| Wheelbase (mm) | 260 |
-| External gear ratio | 1.0 |
+| Motors per side | 2 |
+| Cartridge | green |
+| Wheel diameter (in) | 3.25 |
+| Track width (mm) | 292.1 |
+| Wheelbase (mm) | 279.4 |
+| External gear ratio | 0.6 |
 
 `Type` is `tank` or `arcade`.
 
@@ -30,33 +30,63 @@ Leave a cell as `unused` when that device is not on the robot yet. `unused` maps
 
 | Motor | Port | Reversed |
 |---|---|---|
-| Left front | 1 | no |
-| Left middle | 2 | no |
-| Left back | 3 | no |
-| Right front | 11 | yes |
-| Right middle | 12 | yes |
-| Right back | 13 | yes |
+| Left front | 14 | yes |
+| Left middle | unused | no |
+| Left back | 13 | yes |
+| Right front | 18 | no |
+| Right middle | unused | yes |
+| Right back | 19 | no |
 
 For a 4-motor drive, set `Motors per side` to `2` and set `Left middle` and `Right middle` to `unused`.
 
 ## Mechanisms
 
-One row per motor that is not part of the drive. `Role` is a short name used in code (`Intake`, `Scorer`). `Buttons` are the controller buttons that run it during driver control, written as `forward / reverse`.
+One row per motor that is not part of the drive. `Role` is a short name used in code (`Scorer`). `Buttons` are the controller buttons that run it during driver control, written as `forward / reverse`.
 
 | Role | Port | Cartridge | Reversed | Hold | Buttons |
 |---|---|---|---|---|---|
-| Intake | unused | green | no | coast | R1 / R2 |
-| Scorer | unused | red | no | hold | L1 / L2 |
+| Scorer | unused | red | no | hold | unused |
+| Lift A | 8 | green | no | hold | L1 / L2 |
+| Lift B | 9 | green | yes | hold | L1 / L2 |
+| Arm | 7 | red | no | hold | R1 / R2 |
+| Claw | 15 | green | no | hold | X / B |
+| Wrist | 11 | green | no | hold | Up / Down |
+
+Lift A and Lift B share one shaft and face each other. Port 9 is commanded the opposite way from port 8 so they turn the shaft the same way. L1 winds the string up. L2 lets it down. Releasing both buttons holds the string.
+
+The arm has no sensor. Hold R1 to move it toward the front. Hold R2 to move it toward the back. Releasing both holds it where it is.
+
+The motor shaft has a 24-tooth gear driving a 72-tooth gear on the arm, so the output is 3 times slower than the motor.
+
+The claw is a ratchet on port 15. Hold X and it spins to intake. A short press of B stops it. Hold B for more than 2 seconds and it turns 30 motor degrees the other way, then holds it open.
+
+The wrist tilts the claw. Hold Up to tilt one way. Hold Down to tilt the other way. Releasing both holds it. It uses brain port 11, which used to be the left middle drive motor. Port 20 is empty.
 
 `Hold` is `coast`, `brake`, or `hold`.
+
+## Pneumatics
+
+A 3-wire solenoid. `Port` is a letter `A` through `H` on the brain's 3-wire bank. `Button` is the controller button that turns it on while held. Releasing the button turns it off.
+
+| Role | Port | Button |
+|---|---|---|
+| Pneumatic | A | Left |
 
 ## Sensors
 
 | Sensor | Port | Notes |
 |---|---|---|
-| Inertial | unused | Calibrated in pre_auton when the port is set |
+| Inertial | 1 | Calibrated in pre_auton. Sits still for about 2 seconds. |
+| Forward rotation | 10 | 2 inch omni, facing the front. 0.125 inches left of center. |
+| Sideways rotation | 16 | 2 inch omni, perpendicular. 1.75 inches in front of center. |
+| Distance front | 3 | Looks forward. |
+| Distance left | 2 | Looks left. |
+| Distance right | 5 | Looks right. |
+| Distance back | 12 | Looks backward. |
 
-Sensor ports are smart ports `1`–`20`, or `unused`.
+Smart sensor ports are `1`–`20`, or `unused`. 3-wire ports are `A`–`H`. The arm has no sensor.
+
+Autonomous drive and turn commands use the tracking wheels and the inertial sensor. `autonDriveToWall` stops at a measured wall distance. For left or right it turns to face that wall, drives, then turns back. Driver control still uses the joysticks.
 
 ## Driver control
 
